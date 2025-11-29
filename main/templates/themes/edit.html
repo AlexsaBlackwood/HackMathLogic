@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>This is theme edit page</h1>
+<form action="{% url 'theme_edit' theme.id %}" method="post">
+    {% csrf_token %}
+    {{form}}
+    <input type="submit">
+</form>
+<hr>
+<form action="{% url 'theme_delete' theme.id %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="удалить">
+</form>
+</body>
+</html>
