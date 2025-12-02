@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <title>Title</title>
     {% load static %}
@@ -10,7 +9,7 @@
 <body>
     <h1>Список тем</h1>
     <ul>
-        {% for theme in themes %}
+        {% for theme in object_list %}
         <li><a href = "{% url 'theme_view' theme.id %}">{{theme.title}}</a> (<a href="{% url 'theme_edit' theme.id %}">ред.</a>)
             <ul>
                 {% for subtheme in theme.subthemes.all %}

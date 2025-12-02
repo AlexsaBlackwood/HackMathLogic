@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import ListView
 from django.urls import reverse
 
 from main.forms import ThemeForm, SubThemeForm
@@ -11,10 +12,9 @@ def index_page(request):
     return render(request, "index.html")
 
 
-def themes_page(request):
-    themes = Theme.objects.all()
-    subthemes = SubTheme.objects.all()
-    return render(request, "themes/list.html", {"themes": themes, "subthemes": subthemes})
+class ThemesList(ListView):
+    model = Theme
+    template_name = 'themes/list.html'
 
 
 def theme_view_page(request, id):
