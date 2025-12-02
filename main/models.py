@@ -4,16 +4,20 @@ from django.db import models
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
 # ------------------------
 # Темы → Подтемы → Статьи
 # ------------------------
 class Theme(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, verbose_name="Название")
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse("theme_view", kwargs={"id": self.id})
 
 
 class SubTheme(models.Model):

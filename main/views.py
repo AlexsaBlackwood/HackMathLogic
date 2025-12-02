@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView
 from django.urls import reverse
 
 from main.forms import ThemeForm, SubThemeForm
@@ -23,17 +24,10 @@ class ThemesView(DetailView):
     pk_url_kwarg = 'id'
 
 
-def theme_add_page(request):
-    if request.method == "GET":
-        form = ThemeForm()
-        return render(request, "themes/add.html", {"form": form})
-    form = ThemeForm(request.POST)
-    if form.is_valid():
-        new_theme = Theme(title=form.cleaned_data['title'])
-        new_theme.save()
-        return redirect(reverse("theme_view", kwargs={"id": new_theme.id}))
-    else:
-        return render(request, "themes/add.html", {"form": form})
+class ThemeAddView(CreateView):
+    model = Theme
+    fields = ["title"]
+    template_name = 'themes/add.html'
 
 
 def theme_edit_page(request, id):
