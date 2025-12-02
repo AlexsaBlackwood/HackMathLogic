@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView
-from django.urls import reverse
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse, reverse_lazy
 
 from main.forms import ThemeForm, SubThemeForm
 from main.models import *
@@ -30,26 +30,18 @@ class ThemeAddView(CreateView):
     template_name = 'themes/add.html'
 
 
-def theme_edit_page(request, id):
-    theme = get_object_or_404(Theme, id=id)
-    if request.method == "GET":
-        form = ThemeForm(initial={"title": theme.title})
-        return render(request, "themes/edit.html", {"form": form, "theme": theme})
-    form = ThemeForm(request.POST)
-    if form.is_valid():
-        theme.title = form.cleaned_data['title']
-        theme.save()
-        return redirect(reverse("theme_view", kwargs={"id": theme.id}))
-    else:
-        return render(request, "themes/edit.html", {"form": form})
+class ThemeEditView (UpdateView):
+    model = Theme
+    fields = ["title"]
+    template_name = 'themes/edit.html'
+    pk_url_kwarg = 'id'
 
 
-def theme_delete_page(request, id):
-    if request.method == "GET":
-        return redirect(reverse('theme_edit', kwargs={"id": id}))
-    theme = get_object_or_404(Theme, id=id)
-    theme.delete()
-    return redirect(reverse('themes_list'))
+class ThemeDeleteView (DeleteView):
+    model = Theme
+    template_name = 'themes/delete.html'
+    pk_url_kwarg = 'id'
+    success_url = reverse_lazy("themes_list")
 
 
 def subtheme_view_page(request, t_id, st_id):
