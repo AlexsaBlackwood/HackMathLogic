@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-<h1>This is theme view page</h1>
-<p>name: {{theme.title}}</p>
-
-<a href="{% url 'themes_list' %}">Назад</a>
-<!-- TODO список субтем -->
+    <h1>Просмотр темы</h1>
+    <h3>Название: {{theme.title}}</h3>
+    <a href="{% url 'themes_list' %}">Назад</a>
+    <ul>
+        {% for subthem in theme.subthemes.all %}
+            <li><a href="{% url 'subtheme_view' subthem.theme_id subthem.id %}">{{subthem.title}}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'subtheme_add' theme.id %}">Добавить подтему</a>
 </body>
 </html>

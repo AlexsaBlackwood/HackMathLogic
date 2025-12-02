@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>Просмотр подтемы</h1>
+    <h3>Название: {{subtheme.title}}</h3>
+    {% for article in subtheme.articles.all %}
+        <p>{{article.text}}</p>
+    {% endfor %}
+    (<a href="{% url 'subtheme_edit' theme.id subtheme.id %}">ред.</a>)
+    <a href="{% url 'theme_view' theme.id %}">Назад</a>
+</body>
+</html>

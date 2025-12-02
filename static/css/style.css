@@ -1,0 +1,9 @@
+li {
+    color: red;
+}
+
+a:active,
+a:hover,
+a {
+  color: black;
+}
