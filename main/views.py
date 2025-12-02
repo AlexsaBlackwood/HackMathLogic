@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.urls import reverse
 
 from main.forms import ThemeForm, SubThemeForm
@@ -17,11 +17,10 @@ class ThemesList(ListView):
     template_name = 'themes/list.html'
 
 
-def theme_view_page(request, id):
-    theme = get_object_or_404(Theme, id=id)
-    subthemes = SubTheme.objects.all()
-    articles = Article.objects.all()
-    return render(request, "themes/view.html", {"theme": theme, "subthemes": subthemes, "articles": articles})
+class ThemesView(DetailView):
+    model = Theme
+    template_name = 'themes/view.html'
+    pk_url_kwarg = 'id'
 
 
 def theme_add_page(request):
