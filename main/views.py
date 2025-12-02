@@ -13,34 +13,30 @@ def index_page(request):
     return render(request, "index.html")
 
 
-class ThemesList(ListView):
+class ThemeBaseMixin:
     model = Theme
+    pk_url_kwarg = 'id'
+    fields = ["title"]
+
+
+class ThemeListView(ThemeBaseMixin, ListView):
     template_name = 'themes/list.html'
 
 
-class ThemesView(DetailView):
-    model = Theme
+class ThemeDetailView(ThemeBaseMixin, DetailView):
     template_name = 'themes/view.html'
-    pk_url_kwarg = 'id'
 
 
-class ThemeAddView(CreateView):
-    model = Theme
-    fields = ["title"]
+class ThemeAddView(ThemeBaseMixin, CreateView):
     template_name = 'themes/add.html'
 
 
-class ThemeEditView (UpdateView):
-    model = Theme
-    fields = ["title"]
+class ThemeEditView(ThemeBaseMixin, UpdateView):
     template_name = 'themes/edit.html'
-    pk_url_kwarg = 'id'
 
 
-class ThemeDeleteView (DeleteView):
-    model = Theme
+class ThemeDeleteView(ThemeBaseMixin, DeleteView):
     template_name = 'themes/delete.html'
-    pk_url_kwarg = 'id'
     success_url = reverse_lazy("themes_list")
 
 

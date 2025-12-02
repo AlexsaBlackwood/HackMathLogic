@@ -22,8 +22,8 @@ import main.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main.views.index_page, name="index"),
-    path('themes/', main.views.ThemesList.as_view(), name="themes_list"),
-    path('themes/<int:id>/', main.views.ThemesView.as_view(), name="theme_view"),
+    path('themes/', main.views.ThemeListView.as_view(), name="themes_list"),
+    path('themes/<int:id>/', main.views.ThemeDetailView.as_view(), name="theme_view"),
     path('themes/add/', main.views.ThemeAddView.as_view(), name="theme_add"),
     path('themes/<int:id>/edit/', main.views.ThemeEditView.as_view(), name="theme_edit"),
     path('themes/<int:id>/delete/', main.views.ThemeDeleteView.as_view(), name="theme_delete"),
