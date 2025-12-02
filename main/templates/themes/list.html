@@ -1,24 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <h1>Список тем</h1>
-    <ul>
-        {% for theme in object_list %}
-        <li><a href = "{% url 'theme_view' theme.id %}">{{theme.title}}</a> (<a href="{% url 'theme_edit' theme.id %}">ред.</a>)
-            <ul>
-                {% for subtheme in theme.subthemes.all %}
-                    <li><a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a></li>
-                {% endfor %}
-            </ul>
-        </li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'theme_add' %}">Добавить тему</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Список тем</h1>
+<ul>
+    {% for theme in object_list %}
+    <li><a href = "{% url 'theme_view' theme.id %}">{{theme.title}}</a> (<a href="{% url 'theme_edit' theme.id %}">ред.</a>)
+        <ul>
+            {% for subtheme in theme.subthemes.all %}
+                <li><a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'theme_add' %}">Добавить тему</a>
+{% endblock %}

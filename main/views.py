@@ -36,7 +36,6 @@ class ThemeEditView(ThemeBaseMixin, UpdateView):
 
 
 class ThemeDeleteView(ThemeBaseMixin, DeleteView):
-    template_name = 'themes/delete.html'
     success_url = reverse_lazy("themes_list")
 
 

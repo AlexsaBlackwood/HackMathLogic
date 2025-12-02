@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <h1>Просмотр темы</h1>
-    <h3>Название: {{object.title}}</h3>
-    <a href="{% url 'themes_list' %}">Назад</a>
-    <ul>
-        {% for subthem in object.subthemes.all %}
-            <li><a href="{% url 'subtheme_view' subthem.theme_id subthem.id %}">{{subthem.title}}</a></li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'subtheme_add' theme.id %}">Добавить подтему</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Просмотр темы</h1>
+<h3>Название: {{object.title}}</h3>
+<a href="{% url 'themes_list' %}">Назад</a>
+<ul>
+    {% for subthem in object.subthemes.all %}
+        <li><a href="{% url 'subtheme_view' subthem.theme_id subthem.id %}">{{subthem.title}}</a></li>
+    {% endfor %}
+</ul>
+<a href="{% url 'subtheme_add' theme.id %}">Добавить подтему</a>
+{% endblock %}
