@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>✏️ Редактирование варианта ответа</h1>
+<div class="breadcrumb">
+    <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
+    <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a> → 
+    <a href="{% url 'test_view' theme.id subtheme.id test.id %}">{{test.question}}</a> → 
+    <a href="{% url 'testquestion_view' theme.id subtheme.id test.id question.id %}">{{question.text}}</a>
+</div>
+<div class="card">
+    <form action="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{form.as_p}}
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        <a href="{% url 'testanswervariant_view' theme.id subtheme.id test.id question.id answer.id %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+<hr>
+<div class="card" style="background: #fff5f5; border-color: #f44336;">
+    <h3 style="color: #d32f2f;">⚠️ Удаление варианта ответа</h3>
+    <p style="color: #666; margin-bottom: 15px;">Это действие нельзя отменить.</p>
+    <form action="{% url 'testanswervariant_delete' theme.id subtheme.id test.id question.id answer.id %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Удалить вариант ответа</button>
+    </form>
+</div>
+{% endblock %}
+

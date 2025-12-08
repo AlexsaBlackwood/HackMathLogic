@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{% url 'test_run' theme.id subtheme.id test.id %}" method="post">
+    {% csrf_token %}
+    {% for question in test.questions.all %}
+        <p>{{ question.text }}</p>
+        {% for answer in question.answers.all %}
+            {% if not show_answers %}
+            <input type="checkbox" name="{{ question.id }}" value="{{ answer.id }}">
+            {% endif %}
+            <label>
+                {% if answer.id in answers %} <b> {% endif%}
+                {{ answer.text }}
+                {% if answer.id in answers %} </b> {% endif%}
+                {% if show_answers %}
+                    ({% if answer.is_right %} правильно {% else %} не правильно {% endif %})
+                {% endif %}
+            </label>
+            <br>
+        {% endfor %}
+    {% endfor %}
+    {% if not show_answers %}
+        <input type="submit">
+    {% endif %}
+</form>
+
+
+
+{% endblock %}

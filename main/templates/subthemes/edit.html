@@ -1,20 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>This is subtheme edit page</h1>
-<form action="{% url 'subtheme_edit' theme.id subtheme.id %}" method="post">
-    {% csrf_token %}
-    {{form}}
-    <input type="submit">
-</form>
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>✏️ Редактирование подтемы</h1>
+<div class="breadcrumb">
+    <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
+    <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a>
+</div>
+<div class="card">
+    <form action="{% url 'subtheme_edit' theme.id subtheme.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{form.as_p}}
+        </div>
+        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        <a href="{% url 'subtheme_view' theme.id subtheme.id %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
 <hr>
-<form action="{% url 'subtheme_delete' theme.id subtheme.id %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="удалить">
-</form>
-</body>
-</html>
+<div class="card" style="background: #fff5f5; border-color: #f44336;">
+    <h3 style="color: #d32f2f;">⚠️ Удаление подтемы</h3>
+    <p style="color: #666; margin-bottom: 15px;">Это действие нельзя отменить. Все тесты и связанные данные будут удалены.</p>
+    <form action="{% url 'subtheme_delete' theme.id subtheme.id %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">🗑️ Удалить подтему</button>
+    </form>
+</div>
+{% endblock %}

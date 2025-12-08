@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .test-container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .test-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .test-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 28px;
+    }
+    .test-header .breadcrumb {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    .test-header .breadcrumb a {
+        color: white;
+        text-decoration: underline;
+    }
+    .question-card {
+        background: #ffffff;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s ease;
+    }
+    .question-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .question-number {
+        background: #667eea;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .question-text {
+        flex: 1;
+        margin-left: 15px;
+        font-size: 18px;
+        font-weight: 500;
+    }
+    .question-text a {
+        color: #333;
+        text-decoration: none;
+    }
+    .question-text a:hover {
+        color: #667eea;
+        text-decoration: underline;
+    }
+    .edit-link {
+        color: #666;
+        font-size: 14px;
+        text-decoration: none;
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    .edit-link:hover {
+        background: #f5f5f5;
+        color: #667eea;
+    }
+    .answers-section {
+        margin-top: 15px;
+    }
+    .answers-section h5 {
+        color: #555;
+        margin-bottom: 12px;
+        font-size: 16px;
+    }
+    .answer-item {
+        background: #f9f9f9;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        border-left: 4px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+    }
+    .answer-item:hover {
+        background: #f0f0f0;
+        border-left-color: #667eea;
+    }
+    .answer-item.correct {
+        border-left-color: #4caf50;
+        background: #f1f8f4;
+    }
+    .answer-item.incorrect {
+        border-left-color: #f44336;
+        background: #fff5f5;
+    }
+    .answer-text {
+        flex: 1;
+        font-size: 15px;
+    }
+    .answer-text a {
+        color: #333;
+        text-decoration: none;
+    }
+    .answer-text a:hover {
+        color: #667eea;
+        text-decoration: underline;
+    }
+    .answer-status {
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .answer-status.correct {
+        color: #4caf50;
+    }
+    .answer-status.incorrect {
+        color: #f44336;
+    }
+    .empty-message {
+        color: #999;
+        font-style: italic;
+        padding: 15px;
+        text-align: center;
+        background: #f9f9f9;
+        border-radius: 6px;
+    }
+    .action-buttons {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 6px;
+        text-align: center;
+    }
+    .action-buttons a {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 5px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background 0.3s;
+        font-weight: 500;
+    }
+    .action-buttons a:hover {
+        background: #5568d3;
+    }
+    .action-buttons a.secondary {
+        background: #6c757d;
+    }
+    .action-buttons a.secondary:hover {
+        background: #5a6268;
+    }
+    .footer-actions {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+        text-align: center;
+    }
+    .footer-actions a {
+        display: inline-block;
+        padding: 8px 15px;
+        margin: 0 5px;
+        color: #667eea;
+        text-decoration: none;
+        border: 1px solid #667eea;
+        border-radius: 5px;
+        transition: all 0.2s;
+    }
+    .footer-actions a:hover {
+        background: #667eea;
+        color: white;
+    }
+</style>
+
+<div class="test-container">
+    <div class="test-header">
+        <h1>📝 {{test.question}}</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
+            <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a>
+        </div>
+    </div>
+
+    <h2 style="color: #555; margin-bottom: 20px;">Вопросы теста:</h2>
+    
+    {% for question in test.questions.all %}
+        <div class="question-card">
+            <div class="question-header">
+                <span class="question-number">Вопрос {{forloop.counter}}</span>
+                <span class="question-text">
+                    <a href="{% url 'testquestion_view' theme.id subtheme.id test.id question.id %}">{{question.text}}</a>
+                </span>
+                <a href="{% url 'testquestion_edit' theme.id subtheme.id test.id question.id %}" class="edit-link">✏️ ред.</a>
+            </div>
+            
+            <div class="answers-section">
+                <h5>💡 Варианты ответов:</h5>
+                {% if question.answers.all %}
+                    {% for answer in question.answers.all %}
+                        <div class="answer-item {% if answer.is_right %}correct{% else %}incorrect{% endif %}">
+                            <span class="answer-text">
+                                <a href="{% url 'testanswervariant_view' theme.id subtheme.id test.id question.id answer.id %}">
+                                    {{answer.text}}
+                                </a>
+                            </span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                {% if answer.is_right %}
+                                    <span class="answer-status correct">✓ Верный</span>
+                                {% else %}
+                                    <span class="answer-status incorrect">✗ Неверный</span>
+                                {% endif %}
+                                <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="edit-link" style="font-size: 12px;">ред.</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-message">Варианты ответов отсутствуют</div>
+                {% endif %}
+                <div class="action-buttons">
+                    <a href="{% url 'testanswervariant_add' theme.id subtheme.id test.id question.id %}">+ Добавить вариант ответа</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="question-card">
+            <div class="empty-message">Вопросы отсутствуют</div>
+        </div>
+    {% endfor %}
+
+    <div class="footer-actions">
+        <a href="{% url 'testquestion_add' theme.id subtheme.id test.id %}">+ Добавить вопрос</a>
+        <a href="{% url 'test_edit' theme.id subtheme.id test.id %}">✏️ Редактировать тест</a>
+        <a href="{% url 'tests_list' theme.id subtheme.id %}">← Назад к списку тестов</a>
+    </div>
+</div>
+{% endblock %}
+

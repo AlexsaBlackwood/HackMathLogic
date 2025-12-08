@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>➕ Добавление варианта ответа</h1>
+<div class="breadcrumb">
+    <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
+    <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a> → 
+    <a href="{% url 'test_view' theme.id subtheme.id test.id %}">{{test.question}}</a> → 
+    <a href="{% url 'testquestion_view' theme.id subtheme.id test.id question.id %}">{{question.text}}</a>
+</div>
+<div class="card">
+    <form action="{% url 'testanswervariant_add' theme.id subtheme.id test.id question.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{form.as_p}}
+        </div>
+        <button type="submit" class="btn btn-success">Добавить вариант ответа</button>
+        <a href="{% url 'testquestion_view' theme.id subtheme.id test.id question.id %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}
+
