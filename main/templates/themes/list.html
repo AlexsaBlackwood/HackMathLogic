@@ -1,17 +1,84 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Список тем</h1>
-<ul>
-    {% for theme in object_list %}
-    <li><a href = "{% url 'theme_view' theme.id %}">{{theme.title}}</a> (<a href="{% url 'theme_edit' theme.id %}">ред.</a>)
-        <ul>
-            {% for subtheme in theme.subthemes.all %}
-                <li><a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a></li>
+<div class="themes-list-container">
+    <div class="page-header">
+        <h1>Все темы</h1>
+        <p class="page-description">Изучайте элементы математической логики по темам</p>
+        {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+            <a href="{% url 'theme_add' %}" class="btn btn-primary btn-add-theme">
+                Добавить новую тему
+            </a>
+        {% endif %}
+    </div>
+
+    {% if object_list %}
+        <div class="themes-grid">
+            {% for theme in object_list %}
+                <div class="theme-card">
+                    <div class="theme-card-header">
+                        <h2 class="theme-title">
+                            <a href="{% url 'theme_view' theme.id %}">{{ theme.title }}</a>
+                        </h2>
+                        {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                            <div class="theme-actions">
+                                <a href="{% url 'theme_edit' theme.id %}" class="btn-icon" title="Редактировать">
+                                    Редактировать
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="theme-content">
+                        {% if theme.subthemes.all %}
+                            <div class="subthemes-list">
+                                <h3 class="subthemes-title">Подтемы:</h3>
+                                <ul class="subthemes-items">
+                                    {% for subtheme in theme.subthemes.all %}
+                                        <li class="subtheme-item">
+                                            <a href="{% url 'subtheme_view' theme.id subtheme.id %}" class="subtheme-link">
+                                                <span class="subtheme-icon"></span>
+                                                <span class="subtheme-text">{{ subtheme.title }}</span>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="empty-subthemes">
+                                <p>Подтемы пока не добавлены</p>
+                                {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                                    <a href="{% url 'subtheme_add' theme.id %}" class="btn btn-outline-small">
+                                        Добавить подтему
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="theme-footer">
+                        <a href="{% url 'theme_view' theme.id %}" class="btn btn-primary btn-view-theme">
+                            Просмотреть тему
+                        </a>
+                    </div>
+                </div>
             {% endfor %}
-        </ul>
-    </li>
-    {% endfor %}
-</ul>
-<a href="{% url 'theme_add' %}">Добавить тему</a>
+        </div>
+    {% else %}
+        <div class="empty-themes">
+            <div class="empty-state-large">
+                <div class="empty-icon"></div>
+                <h2>Темы пока не добавлены</h2>
+                <p>Начните создавать темы для изучения математической логики</p>
+                {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                    <a href="{% url 'theme_add' %}" class="btn btn-primary">
+                        Создать первую тему
+                    </a>
+                {% else %}
+                    <p class="auth-prompt">Войдите как преподаватель или администратор, чтобы создавать темы</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

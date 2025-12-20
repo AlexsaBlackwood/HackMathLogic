@@ -5,6 +5,8 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 # ------------------------
@@ -82,3 +84,47 @@ class ResultItem(models.Model):
 
     def __str__(self):
         return f"Ответ #{self.id} (Result {self.result.id})"
+
+
+# ------------------------
+# Профили пользователей
+# ------------------------
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('STUDENT', 'Учащийся'),
+        ('TEACHER', 'Преподаватель'),
+        ('ADMIN', 'Администратор'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT', verbose_name="Роль")
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.get_role_display()}"
+    
+    def is_student(self):
+        return self.role == 'STUDENT'
+    
+    def is_teacher(self):
+        return self.role == 'TEACHER'
+    
+    def is_admin(self):
+        return self.role == 'ADMIN'
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        # Если пользователь - суперпользователь, устанавливаем роль ADMIN
+        role = 'ADMIN' if instance.is_superuser else 'STUDENT'
+        UserProfile.objects.create(user=instance, role=role)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        # Если пользователь стал суперпользователем, обновляем роль
+        if instance.is_superuser and instance.profile.role != 'ADMIN':
+            instance.profile.role = 'ADMIN'
+            instance.profile.save()
+        instance.profile.save()

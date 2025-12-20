@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>❓ Просмотр вопроса</h1>
+<h1>Просмотр вопроса</h1>
 <div class="breadcrumb">
     <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
     <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a> → 
@@ -11,7 +11,7 @@
     <h2 style="color: white; border: none; padding: 0; margin: 0;">{{question.text}}</h2>
 </div>
 
-<h3>💡 Варианты ответов:</h3>
+<h3>Варианты ответов:</h3>
 {% if question.answers.all %}
     {% for answer in question.answers.all %}
         <div class="card" style="border-left: 4px solid {% if answer.is_right %}#4caf50{% else %}#f44336{% endif %};">
@@ -21,12 +21,12 @@
                         {{answer.text}}
                     </a>
                     {% if answer.is_right %}
-                        <span class="badge badge-success">✓ Верный</span>
+                        <span class="badge badge-success">Верный</span>
                     {% else %}
-                        <span class="badge badge-danger">✗ Неверный</span>
+                        <span class="badge badge-danger">Неверный</span>
                     {% endif %}
                 </div>
-                <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="btn btn-secondary" style="padding: 5px 15px; font-size: 12px;">✏️ ред.</a>
+                <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="btn btn-secondary" style="padding: 5px 15px; font-size: 12px;">ред.</a>
             </div>
         </div>
     {% endfor %}
@@ -36,7 +36,7 @@
 
 <div style="margin-top: 25px;">
     <a href="{% url 'testanswervariant_add' theme.id subtheme.id test.id question.id %}" class="btn btn-success">+ Добавить вариант ответа</a>
-    <a href="{% url 'testquestion_edit' theme.id subtheme.id test.id question.id %}" class="btn btn-secondary">✏️ Редактировать вопрос</a>
+    <a href="{% url 'testquestion_edit' theme.id subtheme.id test.id question.id %}" class="btn btn-secondary">Редактировать вопрос</a>
     <a href="{% url 'test_view' theme.id subtheme.id test.id %}" class="btn btn-secondary">← Назад к тесту</a>
 </div>
 {% endblock %}

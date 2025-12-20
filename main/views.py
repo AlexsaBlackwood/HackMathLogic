@@ -3,12 +3,101 @@ from django.views import View
 from django.views.generic import ListView, DetailView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
-from main.forms import SubThemeForm
-from main.models import Theme, SubTheme, Article, Test, TestQuestion, TestAnswerVariant
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from main.forms import SubThemeForm, UserRegistrationForm, UserLoginForm
+from main.models import Theme, SubTheme, Article, Test, TestQuestion, TestAnswerVariant, UserProfile, Result, ResultItem
+from django.core.exceptions import PermissionDenied
 
 
 def index_page(request):
     return render(request, "index.html")
+
+
+# ------------------------
+# Миксины для проверки прав
+# ------------------------
+class RoleRequiredMixin:
+    """Базовый миксин для проверки роли пользователя"""
+    required_roles = []
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.error(request, 'Необходима авторизация.')
+            return redirect('login')
+        
+        if not hasattr(request.user, 'profile'):
+            messages.error(request, 'Профиль пользователя не найден.')
+            return redirect('login')
+        
+        if self.required_roles and request.user.profile.role not in self.required_roles:
+            messages.error(request, 'У вас нет прав для выполнения этого действия.')
+            return redirect('index')
+        
+        return super().dispatch(request, *args, **kwargs)
+
+
+class TeacherRequiredMixin(RoleRequiredMixin):
+    """Доступ только для преподавателей и администраторов"""
+    required_roles = ['TEACHER', 'ADMIN']
+
+
+class AdminRequiredMixin(RoleRequiredMixin):
+    """Доступ только для администраторов"""
+    required_roles = ['ADMIN']
+
+
+# ------------------------
+# Авторизация
+# ------------------------
+class RegisterView(View):
+    template_name = 'auth/register.html'
+    
+    def get(self, request):
+        if request.user.is_authenticated:
+            return redirect('index')
+        form = UserRegistrationForm()
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request):
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Аккаунт {username} успешно создан!')
+            login(request, user)
+            return redirect('index')
+        return render(request, self.template_name, {'form': form})
+
+
+class LoginView(View):
+    template_name = 'auth/login.html'
+    
+    def get(self, request):
+        if request.user.is_authenticated:
+            return redirect('index')
+        form = UserLoginForm()
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request):
+        form = UserLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Добро пожаловать, {username}!')
+                return redirect('index')
+            else:
+                messages.error(request, 'Неверное имя пользователя или пароль.')
+        return render(request, self.template_name, {'form': form})
+
+
+class LogoutView(DjangoLogoutView):
+    next_page = 'index'
 
 
 class ThemeBaseMixin:
@@ -17,23 +106,25 @@ class ThemeBaseMixin:
     fields = ["title"]
 
 
-class ThemeListView(ThemeBaseMixin, ListView):
+class ThemeListView(RoleRequiredMixin, ThemeBaseMixin, ListView):
     template_name = 'themes/list.html'
+    required_roles = []  # Доступно всем авторизованным
 
 
-class ThemeDetailView(ThemeBaseMixin, DetailView):
+class ThemeDetailView(RoleRequiredMixin, ThemeBaseMixin, DetailView):
     template_name = 'themes/view.html'
+    required_roles = []  # Доступно всем авторизованным
 
 
-class ThemeAddView(ThemeBaseMixin, CreateView):
+class ThemeAddView(TeacherRequiredMixin, ThemeBaseMixin, CreateView):
     template_name = 'themes/add.html'
 
 
-class ThemeEditView(ThemeBaseMixin, UpdateView):
+class ThemeEditView(TeacherRequiredMixin, ThemeBaseMixin, UpdateView):
     template_name = 'themes/edit.html'
 
 
-class ThemeDeleteView(ThemeBaseMixin, DeleteView):
+class ThemeDeleteView(TeacherRequiredMixin, ThemeBaseMixin, DeleteView):
     success_url = reverse_lazy("themes_list")
 
 
@@ -75,11 +166,12 @@ class SubThemeBaseMixin:
         return redirect(reverse("subtheme_view", kwargs={"t_id": subtheme.theme.id, "st_id": subtheme.id}))
 
 
-class SubThemeDetailView(SubThemeBaseMixin, DetailView):
+class SubThemeDetailView(RoleRequiredMixin, SubThemeBaseMixin, DetailView):
     template_name = 'subthemes/view.html'
+    required_roles = []  # Доступно всем авторизованным
 
 
-class SubThemeUpdateView(SubThemeBaseMixin, UpdateView):
+class SubThemeUpdateView(TeacherRequiredMixin, SubThemeBaseMixin, UpdateView):
     template_name = 'subthemes/edit.html'
 
     def get_initial(self):
@@ -94,14 +186,14 @@ class SubThemeUpdateView(SubThemeBaseMixin, UpdateView):
         return self.get_success_redirect(self.save_subtheme_and_article(form, self.get_object()))
 
 
-class SubThemeCreateView(SubThemeBaseMixin, CreateView):
+class SubThemeCreateView(TeacherRequiredMixin, SubThemeBaseMixin, CreateView):
     template_name = 'subthemes/add.html'
 
     def form_valid(self, form):
         return self.get_success_redirect(self.save_subtheme_and_article(form))
 
 
-class SubThemeDeleteView(SubThemeBaseMixin, DeleteView):
+class SubThemeDeleteView(TeacherRequiredMixin, SubThemeBaseMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         return redirect(reverse('subtheme_edit', kwargs={"t_id": self.kwargs['t_id'], "st_id": self.kwargs['st_id']}))
 
@@ -135,21 +227,23 @@ class TestBaseMixin:
         return redirect(reverse("test_view", kwargs={"t_id": test.subtheme.theme.id, "st_id": test.subtheme.id, "test_id": test.id}))
 
 
-class TestListView(TestBaseMixin, ListView):
+class TestListView(RoleRequiredMixin, TestBaseMixin, ListView):
     template_name = 'tests/list.html'
+    required_roles = []  # Доступно всем авторизованным
 
     def get_queryset(self):
         return Test.objects.filter(subtheme_id=self.kwargs['st_id']).select_related('subtheme', 'subtheme__theme')
 
 
-class TestDetailView(TestBaseMixin, DetailView):
+class TestDetailView(RoleRequiredMixin, TestBaseMixin, DetailView):
     template_name = 'tests/view.html'
+    required_roles = []  # Доступно всем авторизованным
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related('questions__answers')
 
 
-class TestCreateView(TestBaseMixin, CreateView):
+class TestCreateView(TeacherRequiredMixin, TestBaseMixin, CreateView):
     template_name = 'tests/add.html'
 
     def form_valid(self, form):
@@ -159,14 +253,14 @@ class TestCreateView(TestBaseMixin, CreateView):
         return self.get_success_redirect(test)
 
 
-class TestUpdateView(TestBaseMixin, UpdateView):
+class TestUpdateView(TeacherRequiredMixin, TestBaseMixin, UpdateView):
     template_name = 'tests/edit.html'
 
     def form_valid(self, form):
         return self.get_success_redirect(form.save())
 
 
-class TestDeleteView(TestBaseMixin, DeleteView):
+class TestDeleteView(TeacherRequiredMixin, TestBaseMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         return redirect(reverse('test_edit', kwargs={"t_id": self.kwargs['t_id'], "st_id": self.kwargs['st_id'], "test_id": self.kwargs['test_id']}))
 
@@ -202,11 +296,12 @@ class TestQuestionBaseMixin:
         return redirect(reverse("testquestion_view", kwargs={"t_id": question.test.subtheme.theme.id, "st_id": question.test.subtheme.id, "test_id": question.test.id, "q_id": question.id}))
 
 
-class TestQuestionDetailView(TestQuestionBaseMixin, DetailView):
+class TestQuestionDetailView(RoleRequiredMixin, TestQuestionBaseMixin, DetailView):
     template_name = 'testquestions/view.html'
+    required_roles = []  # Доступно всем авторизованным
 
 
-class TestQuestionCreateView(TestQuestionBaseMixin, CreateView):
+class TestQuestionCreateView(TeacherRequiredMixin, TestQuestionBaseMixin, CreateView):
     template_name = 'testquestions/add.html'
 
     def form_valid(self, form):
@@ -216,14 +311,14 @@ class TestQuestionCreateView(TestQuestionBaseMixin, CreateView):
         return self.get_success_redirect(question)
 
 
-class TestQuestionUpdateView(TestQuestionBaseMixin, UpdateView):
+class TestQuestionUpdateView(TeacherRequiredMixin, TestQuestionBaseMixin, UpdateView):
     template_name = 'testquestions/edit.html'
 
     def form_valid(self, form):
         return self.get_success_redirect(form.save())
 
 
-class TestQuestionDeleteView(TestQuestionBaseMixin, DeleteView):
+class TestQuestionDeleteView(TeacherRequiredMixin, TestQuestionBaseMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         return redirect(reverse('testquestion_edit', kwargs={"t_id": self.kwargs['t_id'], "st_id": self.kwargs['st_id'], "test_id": self.kwargs['test_id'], "q_id": self.kwargs['q_id']}))
 
@@ -261,11 +356,12 @@ class TestAnswerVariantBaseMixin:
         return redirect(reverse("testanswervariant_view", kwargs={"t_id": answer.question.test.subtheme.theme.id, "st_id": answer.question.test.subtheme.id, "test_id": answer.question.test.id, "q_id": answer.question.id, "a_id": answer.id}))
 
 
-class TestAnswerVariantDetailView(TestAnswerVariantBaseMixin, DetailView):
+class TestAnswerVariantDetailView(RoleRequiredMixin, TestAnswerVariantBaseMixin, DetailView):
     template_name = 'testanswervariants/view.html'
+    required_roles = []  # Доступно всем авторизованным
 
 
-class TestAnswerVariantCreateView(TestAnswerVariantBaseMixin, CreateView):
+class TestAnswerVariantCreateView(TeacherRequiredMixin, TestAnswerVariantBaseMixin, CreateView):
     template_name = 'testanswervariants/add.html'
 
     def form_valid(self, form):
@@ -275,14 +371,14 @@ class TestAnswerVariantCreateView(TestAnswerVariantBaseMixin, CreateView):
         return self.get_success_redirect(answer)
 
 
-class TestAnswerVariantUpdateView(TestAnswerVariantBaseMixin, UpdateView):
+class TestAnswerVariantUpdateView(TeacherRequiredMixin, TestAnswerVariantBaseMixin, UpdateView):
     template_name = 'testanswervariants/edit.html'
 
     def form_valid(self, form):
         return self.get_success_redirect(form.save())
 
 
-class TestAnswerVariantDeleteView(TestAnswerVariantBaseMixin, DeleteView):
+class TestAnswerVariantDeleteView(TeacherRequiredMixin, TestAnswerVariantBaseMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         return redirect(reverse('testanswervariant_edit', kwargs={"t_id": self.kwargs['t_id'], "st_id": self.kwargs['st_id'], "test_id": self.kwargs['test_id'], "q_id": self.kwargs['q_id'], "a_id": self.kwargs['a_id']}))
 
@@ -296,30 +392,66 @@ class TestAnswerVariantDeleteView(TestAnswerVariantBaseMixin, DeleteView):
         return redirect(reverse('testquestion_view', kwargs={"t_id": t_id, "st_id": st_id, "test_id": test_id, "q_id": q_id}))
 
 
-class TestRunView (View):
-
+class TestRunView(RoleRequiredMixin, View):
     template_name = 'tests/run.html'
+    required_roles = []  # Доступно всем авторизованным
 
     def get(self, request, *args, **kwargs):
         theme = get_object_or_404(Theme, id=kwargs['t_id'])
         subtheme = get_object_or_404(SubTheme, id=kwargs['st_id'])
         test = get_object_or_404(Test, id=kwargs['test_id'])
 
-        return render(request, self.template_name,  {"theme": theme, "subtheme": subtheme, "test": test})
+        return render(request, self.template_name, {"theme": theme, "subtheme": subtheme, "test": test})
 
     def post(self, request, *args, **kwargs):
         theme = get_object_or_404(Theme, id=kwargs['t_id'])
         subtheme = get_object_or_404(SubTheme, id=kwargs['st_id'])
         test = get_object_or_404(Test, id=kwargs['test_id'])
-        print(self.request.POST)
-
-        answers = []
-        for k in self.request.POST.keys():
-            print(k)
-            if k.isdigit():
-                v = self.request.POST.getlist(k)
-                answers += [int(item) for item in v ]
-
-        print(answers)
-        return render(request, self.template_name, {"theme": theme, "subtheme": subtheme, "test": test, "show_answers": True, "answers": answers})
+        
+        # Получаем выбранные ответы
+        selected_answers = []
+        for key in self.request.POST.keys():
+            if key.isdigit():
+                answer_ids = self.request.POST.getlist(key)
+                selected_answers.extend([int(aid) for aid in answer_ids])
+        
+        # Сохраняем результат теста
+        result = Result.objects.create(user=request.user, test=test)
+        
+        # Сохраняем выбранные ответы
+        for answer_id in selected_answers:
+            try:
+                answer = TestAnswerVariant.objects.get(id=answer_id)
+                ResultItem.objects.create(result=result, answer=answer)
+            except TestAnswerVariant.DoesNotExist:
+                pass
+        
+        # Подсчитываем правильные и неправильные ответы
+        correct_count = 0
+        total_questions = test.questions.count()
+        
+        for question in test.questions.all():
+            correct_answers = set(question.answers.filter(is_right=True).values_list('id', flat=True))
+            selected_for_question = set(
+                ResultItem.objects.filter(
+                    result=result,
+                    answer__question=question
+                ).values_list('answer_id', flat=True)
+            )
+            if correct_answers == selected_for_question and len(correct_answers) > 0:
+                correct_count += 1
+        
+        # Вычисляем процент
+        percentage = (correct_count / total_questions * 100) if total_questions > 0 else 0
+        
+        return render(request, self.template_name, {
+            "theme": theme,
+            "subtheme": subtheme,
+            "test": test,
+            "show_answers": True,
+            "selected_answers": selected_answers,
+            "correct_count": correct_count,
+            "total_questions": total_questions,
+            "percentage": round(percentage, 1)
+        })
 

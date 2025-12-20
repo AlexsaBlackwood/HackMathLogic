@@ -197,7 +197,7 @@
 
 <div class="test-container">
     <div class="test-header">
-        <h1>📝 {{test.question}}</h1>
+        <h1>{{test.question}}</h1>
         <div class="breadcrumb">
             <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
             <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a>
@@ -213,11 +213,13 @@
                 <span class="question-text">
                     <a href="{% url 'testquestion_view' theme.id subtheme.id test.id question.id %}">{{question.text}}</a>
                 </span>
-                <a href="{% url 'testquestion_edit' theme.id subtheme.id test.id question.id %}" class="edit-link">✏️ ред.</a>
+                {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                    <a href="{% url 'testquestion_edit' theme.id subtheme.id test.id question.id %}" class="edit-link">ред.</a>
+                {% endif %}
             </div>
             
             <div class="answers-section">
-                <h5>💡 Варианты ответов:</h5>
+                <h5>Варианты ответов:</h5>
                 {% if question.answers.all %}
                     {% for answer in question.answers.all %}
                         <div class="answer-item {% if answer.is_right %}correct{% else %}incorrect{% endif %}">
@@ -228,20 +230,24 @@
                             </span>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 {% if answer.is_right %}
-                                    <span class="answer-status correct">✓ Верный</span>
+                                    <span class="answer-status correct">Верный</span>
                                 {% else %}
-                                    <span class="answer-status incorrect">✗ Неверный</span>
+                                    <span class="answer-status incorrect">Неверный</span>
                                 {% endif %}
-                                <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="edit-link" style="font-size: 12px;">ред.</a>
+                                {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                                    <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="edit-link" style="font-size: 12px;">ред.</a>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
                     <div class="empty-message">Варианты ответов отсутствуют</div>
                 {% endif %}
-                <div class="action-buttons">
-                    <a href="{% url 'testanswervariant_add' theme.id subtheme.id test.id question.id %}">+ Добавить вариант ответа</a>
-                </div>
+                {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                    <div class="action-buttons">
+                        <a href="{% url 'testanswervariant_add' theme.id subtheme.id test.id question.id %}">+ Добавить вариант ответа</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     {% empty %}
@@ -251,9 +257,14 @@
     {% endfor %}
 
     <div class="footer-actions">
-        <a href="{% url 'testquestion_add' theme.id subtheme.id test.id %}">+ Добавить вопрос</a>
-        <a href="{% url 'test_edit' theme.id subtheme.id test.id %}">✏️ Редактировать тест</a>
-        <a href="{% url 'tests_list' theme.id subtheme.id %}">← Назад к списку тестов</a>
+        {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+            <a href="{% url 'testquestion_add' theme.id subtheme.id test.id %}">+ Добавить вопрос</a>
+            <a href="{% url 'test_edit' theme.id subtheme.id test.id %}">Редактировать тест</a>
+        {% endif %}
+        <a href="{% url 'tests_list' theme.id subtheme.id %}">Назад к списку тестов</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'test_run' theme.id subtheme.id test.id %}">Пройти тест</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

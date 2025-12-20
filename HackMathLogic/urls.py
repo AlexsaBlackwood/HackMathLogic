@@ -22,6 +22,9 @@ import main.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main.views.index_page, name="index"),
+    path('register/', main.views.RegisterView.as_view(), name="register"),
+    path('login/', main.views.LoginView.as_view(), name="login"),
+    path('logout/', main.views.LogoutView.as_view(), name="logout"),
     path('themes/', main.views.ThemeListView.as_view(), name="themes_list"),
     path('themes/<int:id>/', main.views.ThemeDetailView.as_view(), name="theme_view"),
     path('themes/add/', main.views.ThemeAddView.as_view(), name="theme_add"),

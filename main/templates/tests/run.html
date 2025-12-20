@@ -1,31 +1,75 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="test-container">
+    <div class="breadcrumb">
+        <a href="{% url 'theme_view' theme.id %}">{{ theme.title }}</a> / 
+        <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{ subtheme.title }}</a> / 
+        Тест
+    </div>
 
-<form action="{% url 'test_run' theme.id subtheme.id test.id %}" method="post">
-    {% csrf_token %}
-    {% for question in test.questions.all %}
-        <p>{{ question.text }}</p>
-        {% for answer in question.answers.all %}
-            {% if not show_answers %}
-            <input type="checkbox" name="{{ question.id }}" value="{{ answer.id }}">
-            {% endif %}
-            <label>
-                {% if answer.id in answers %} <b> {% endif%}
-                {{ answer.text }}
-                {% if answer.id in answers %} </b> {% endif%}
-                {% if show_answers %}
-                    ({% if answer.is_right %} правильно {% else %} не правильно {% endif %})
-                {% endif %}
-            </label>
-            <br>
-        {% endfor %}
-    {% endfor %}
-    {% if not show_answers %}
-        <input type="submit">
+    {% if show_answers %}
+        <div class="test-results">
+            <h2>Результаты теста</h2>
+            <div class="result-stats">
+                <p><strong>Правильных ответов:</strong> {{ correct_count }} из {{ total_questions }}</p>
+                <p><strong>Процент выполнения:</strong> {{ percentage }}%</p>
+            </div>
+        </div>
     {% endif %}
-</form>
 
-
-
+    <form action="{% url 'test_run' theme.id subtheme.id test.id %}" method="post">
+        {% csrf_token %}
+        {% for question in test.questions.all %}
+            <div class="question-block">
+                <h3 class="question-text">{{ question.text }}</h3>
+                <div class="answers-list">
+                    {% for answer in question.answers.all %}
+                        <div class="answer-item 
+                            {% if show_answers %}
+                                {% if answer.id in selected_answers %}
+                                    {% if answer.is_right %}
+                                        answer-correct-selected
+                                    {% else %}
+                                        answer-incorrect-selected
+                                    {% endif %}
+                                {% else %}
+                                    {% if answer.is_right %}
+                                        answer-correct-not-selected
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        ">
+                            {% if not show_answers %}
+                                <input type="checkbox" name="{{ question.id }}" value="{{ answer.id }}" id="answer_{{ answer.id }}">
+                            {% endif %}
+                            <label for="answer_{{ answer.id }}" class="answer-label">
+                                {{ answer.text }}
+                            </label>
+                            {% if show_answers %}
+                                <span class="answer-status">
+                                    {% if answer.is_right %}
+                                        Правильный ответ
+                                    {% else %}
+                                        Неправильный ответ
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        
+        {% if not show_answers %}
+            <div class="test-submit">
+                <button type="submit" class="btn btn-primary">Завершить тест</button>
+            </div>
+        {% else %}
+            <div class="test-actions">
+                <a href="{% url 'subtheme_view' theme.id subtheme.id %}" class="btn btn-secondary">Вернуться к подтеме</a>
+            </div>
+        {% endif %}
+    </form>
+</div>
 {% endblock %}

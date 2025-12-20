@@ -1,13 +1,85 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Просмотр темы</h1>
-<h3>Название: {{object.title}}</h3>
-<a href="{% url 'themes_list' %}">Назад</a>
-<ul>
-    {% for subthem in object.subthemes.all %}
-        <li><a href="{% url 'subtheme_view' subthem.theme_id subthem.id %}">{{subthem.title}}</a></li>
-    {% endfor %}
-</ul>
-<a href="{% url 'subtheme_add' theme.id %}">Добавить подтему</a>
+<div class="theme-view-container">
+    <div class="breadcrumb" style="margin-bottom: 1.5rem;">
+        <a href="{% url 'themes_list' %}">Все темы</a> / {{ object.title }}
+    </div>
+
+    <div class="theme-header-card">
+        <div class="theme-header-content">
+            <h1>{{ object.title }}</h1>
+            {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                <div class="theme-header-actions">
+                    <a href="{% url 'theme_edit' object.id %}" class="btn btn-secondary">
+                        Редактировать тему
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if object.subthemes.all %}
+        <div class="subthemes-section">
+            <h2 class="section-title">Подтемы</h2>
+            <div class="subthemes-grid">
+                {% for subtheme in object.subthemes.all %}
+                    <div class="subtheme-card">
+                        <div class="subtheme-card-header">
+                            <h3 class="subtheme-card-title">
+                                <a href="{% url 'subtheme_view' object.id subtheme.id %}">
+                                    {{ subtheme.title }}
+                                </a>
+                            </h3>
+                        </div>
+                        <div class="subtheme-card-content">
+                            {% if subtheme.articles.all %}
+                                <p class="subtheme-has-content">Теоретический материал доступен</p>
+                            {% else %}
+                                <p class="subtheme-no-content">Материал пока не добавлен</p>
+                            {% endif %}
+                            
+                            {% if subtheme.tests.all %}
+                                <p class="subtheme-tests-count">
+                                    Тестов: {{ subtheme.tests.count }}
+                                </p>
+                            {% else %}
+                                <p class="subtheme-no-tests">Тесты пока не добавлены</p>
+                            {% endif %}
+                        </div>
+                        <div class="subtheme-card-footer">
+                            <a href="{% url 'subtheme_view' object.id subtheme.id %}" class="btn btn-primary btn-sm">
+                                Просмотреть
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-subthemes-section">
+            <div class="empty-state">
+                <div class="empty-icon"></div>
+                <h3>Подтемы пока не добавлены</h3>
+                <p>Начните добавлять подтемы для изучения материала</p>
+                {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+                    <a href="{% url 'subtheme_add' object.id %}" class="btn btn-primary">
+                        Добавить первую подтему
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="theme-actions-footer">
+        {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+            <a href="{% url 'subtheme_add' object.id %}" class="btn btn-success">
+                Добавить подтему
+            </a>
+        {% endif %}
+        <a href="{% url 'themes_list' %}" class="btn btn-secondary">
+            ← Вернуться к списку тем
+        </a>
+    </div>
+</div>
 {% endblock %}

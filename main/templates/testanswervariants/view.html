@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>💬 Просмотр варианта ответа</h1>
+<h1>Просмотр варианта ответа</h1>
 <div class="breadcrumb">
     <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
     <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a> → 
@@ -11,11 +11,11 @@
 <div class="card" style="background: {% if answer.is_right %}linear-gradient(135deg, #4caf50 0%, #388e3c 100%){% else %}linear-gradient(135deg, #f44336 0%, #d32f2f 100%){% endif %}; color: white; margin-bottom: 25px;">
     <h2 style="color: white; border: none; padding: 0; margin: 0 0 10px 0;">{{answer.text}}</h2>
     <span class="badge" style="background: rgba(255,255,255,0.3); color: white;">
-        {% if answer.is_right %}✓ Верный ответ{% else %}✗ Неверный ответ{% endif %}
+        {% if answer.is_right %}Верный ответ{% else %}Неверный ответ{% endif %}
     </span>
 </div>
 <div style="margin-top: 25px;">
-    <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="btn btn-secondary">✏️ Редактировать</a>
+    <a href="{% url 'testanswervariant_edit' theme.id subtheme.id test.id question.id answer.id %}" class="btn btn-secondary">Редактировать</a>
     <a href="{% url 'testquestion_view' theme.id subtheme.id test.id question.id %}" class="btn btn-secondary">← Назад к вопросу</a>
 </div>
 {% endblock %}

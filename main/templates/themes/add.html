@@ -1,10 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>This is theme add page</h1>
-<form action="{% url 'theme_add' %}" method="post">
-    {% csrf_token %}
-    {{form}}
-    <input type="submit">
-</form>
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Добавить новую тему</h1>
+            <p class="form-description">Создайте новую тему для изучения математической логики</p>
+        </div>
+
+        <form method="post" class="theme-form">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-error">
+                    <strong>Ошибка!</strong> Пожалуйста, исправьте ошибки ниже.
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}" class="form-label">
+                    {{ form.title.label }}
+                    <span class="required">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.help_text %}
+                    <small class="form-help">{{ form.title.help_text }}</small>
+                {% endif %}
+                {% if form.title.errors %}
+                    <div class="field-error">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span>Сохранить тему</span>
+                </button>
+                <a href="{% url 'themes_list' %}" class="btn btn-secondary">
+                    <span>Отмена</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

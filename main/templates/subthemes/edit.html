@@ -1,28 +1,83 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>✏️ Редактирование подтемы</h1>
-<div class="breadcrumb">
-    <a href="{% url 'theme_view' theme.id %}">{{theme.title}}</a> → 
-    <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{subtheme.title}}</a>
-</div>
-<div class="card">
-    <form action="{% url 'subtheme_edit' theme.id subtheme.id %}" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            {{form.as_p}}
+<div class="form-container">
+    <div class="form-card">
+        <div class="breadcrumb" style="margin-bottom: 1.5rem;">
+            <a href="{% url 'theme_view' theme.id %}">{{ theme.title }}</a> / 
+            <a href="{% url 'subtheme_view' theme.id subtheme.id %}">{{ subtheme.title }}</a> / Редактирование
         </div>
-        <button type="submit" class="btn btn-success">Сохранить изменения</button>
-        <a href="{% url 'subtheme_view' theme.id subtheme.id %}" class="btn btn-secondary">Отмена</a>
-    </form>
-</div>
-<hr>
-<div class="card" style="background: #fff5f5; border-color: #f44336;">
-    <h3 style="color: #d32f2f;">⚠️ Удаление подтемы</h3>
-    <p style="color: #666; margin-bottom: 15px;">Это действие нельзя отменить. Все тесты и связанные данные будут удалены.</p>
-    <form action="{% url 'subtheme_delete' theme.id subtheme.id %}" method="post" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">🗑️ Удалить подтему</button>
-    </form>
+
+        <div class="form-header">
+            <h1>Редактировать подтему</h1>
+            <p class="form-description">Измените название и содержание подтемы</p>
+        </div>
+
+        <form method="post" class="theme-form">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-error">
+                    <strong>Ошибка!</strong> Пожалуйста, исправьте ошибки ниже.
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}" class="form-label">
+                    {{ form.title.label }}
+                    <span class="required">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.help_text %}
+                    <small class="form-help">{{ form.title.help_text }}</small>
+                {% endif %}
+                {% if form.title.errors %}
+                    <div class="field-error">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.text.id_for_label }}" class="form-label">
+                    {{ form.text.label }}
+                    <span class="required">*</span>
+                </label>
+                <small class="form-help">Вы можете использовать HTML-разметку для форматирования текста</small>
+                {{ form.text }}
+                {% if form.text.help_text %}
+                    <small class="form-help">{{ form.text.help_text }}</small>
+                {% endif %}
+                {% if form.text.errors %}
+                    <div class="field-error">{{ form.text.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span>Сохранить изменения</span>
+                </button>
+                <a href="{% url 'subtheme_view' theme.id subtheme.id %}" class="btn btn-secondary">
+                    <span>Назад к подтеме</span>
+                </a>
+            </div>
+        </form>
+
+        <div class="danger-zone">
+            <h3>Опасная зона</h3>
+            <p>Удаление подтемы приведет к удалению всех связанных статей и тестов. Это действие нельзя отменить!</p>
+            <form action="{% url 'subtheme_delete' theme.id subtheme.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить эту подтему? Это действие нельзя отменить!');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <span>Удалить подтему</span>
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

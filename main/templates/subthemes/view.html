@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>📄 Просмотр подтемы</h1>
+<h1>Просмотр подтемы</h1>
 <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 25px;">
     <h2 style="color: white; border: none; padding: 0; margin: 0;">{{subtheme.title}}</h2>
     <div class="breadcrumb" style="color: rgba(255,255,255,0.9); margin-top: 10px;">
@@ -10,22 +10,22 @@
 </div>
 
 {% if subtheme.articles.all %}
-    <h3>📝 Статьи:</h3>
+    <h3>Теоретический материал:</h3>
     {% for article in subtheme.articles.all %}
-        <div class="card">
-            <p style="line-height: 1.8; color: #555;">{{article.text}}</p>
+        <div class="card article-content">
+            <div class="article-text">{{article.text|safe}}</div>
         </div>
     {% endfor %}
 {% endif %}
 
 <hr>
 
-<h3>📋 Тесты:</h3>
+<h3>Тесты:</h3>
 {% if subtheme.tests.all %}
     {% for test in subtheme.tests.all %}
         <div class="card">
             <h4>
-                <a href="{% url 'test_view' theme.id subtheme.id test.id %}">📝 {{test.question}}</a>
+                <a href="{% url 'test_view' theme.id subtheme.id test.id %}">{{test.question}}</a>
             </h4>
         </div>
     {% endfor %}
@@ -34,9 +34,11 @@
 {% endif %}
 
 <div style="margin-top: 25px;">
-    <a href="{% url 'tests_list' theme.id subtheme.id %}" class="btn">📋 Все тесты</a>
-    <a href="{% url 'test_add' theme.id subtheme.id %}" class="btn btn-success">+ Добавить тест</a>
-    <a href="{% url 'subtheme_edit' theme.id subtheme.id %}" class="btn btn-secondary">✏️ Редактировать</a>
+    <a href="{% url 'tests_list' theme.id subtheme.id %}" class="btn">Все тесты</a>
+    {% if user.is_authenticated and user.profile and user.profile.role != 'STUDENT' %}
+        <a href="{% url 'test_add' theme.id subtheme.id %}" class="btn btn-success">+ Добавить тест</a>
+        <a href="{% url 'subtheme_edit' theme.id subtheme.id %}" class="btn btn-secondary">Редактировать</a>
+    {% endif %}
     <a href="{% url 'theme_view' theme.id %}" class="btn btn-secondary">← Назад</a>
 </div>
 {% endblock %}
