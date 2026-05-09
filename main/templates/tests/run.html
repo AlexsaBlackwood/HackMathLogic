@@ -25,37 +25,12 @@
                 <h3 class="question-text">{{ question.text }}</h3>
                 <div class="answers-list">
                     {% for answer in question.answers.all %}
-                        <div class="answer-item 
-                            {% if show_answers %}
-                                {% if answer.id in selected_answers %}
-                                    {% if answer.is_right %}
-                                        answer-correct-selected
-                                    {% else %}
-                                        answer-incorrect-selected
-                                    {% endif %}
-                                {% else %}
-                                    {% if answer.is_right %}
-                                        answer-correct-not-selected
-                                    {% endif %}
-                                {% endif %}
-                            {% endif %}
-                        ">
+                        <label class="answer-item">
                             {% if not show_answers %}
-                                <input type="checkbox" name="{{ question.id }}" value="{{ answer.id }}" id="answer_{{ answer.id }}">
+                                <input type="checkbox" name="{{ question.id }}" value="{{ answer.id }}">
                             {% endif %}
-                            <label for="answer_{{ answer.id }}" class="answer-label">
-                                {{ answer.text }}
-                            </label>
-                            {% if show_answers %}
-                                <span class="answer-status">
-                                    {% if answer.is_right %}
-                                        Правильный ответ
-                                    {% else %}
-                                        Неправильный ответ
-                                    {% endif %}
-                                </span>
-                            {% endif %}
-                        </div>
+                            <span class="answer-text">{{ answer.text }}</span>
+                        </label>
                     {% endfor %}
                 </div>
             </div>

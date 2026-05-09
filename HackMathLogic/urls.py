@@ -48,4 +48,5 @@ urlpatterns = [
     path('themes/<int:t_id>/<int:st_id>/tests/<int:test_id>/questions/<int:q_id>/answers/add/', main.views.TestAnswerVariantCreateView.as_view(), name="testanswervariant_add"),
     path('themes/<int:t_id>/<int:st_id>/tests/<int:test_id>/questions/<int:q_id>/answers/<int:a_id>/edit/', main.views.TestAnswerVariantUpdateView.as_view(), name="testanswervariant_edit"),
     path('themes/<int:t_id>/<int:st_id>/tests/<int:test_id>/questions/<int:q_id>/answers/<int:a_id>/delete/', main.views.TestAnswerVariantDeleteView.as_view(), name="testanswervariant_delete"),
+    path('profile/', main.views.ProfileView.as_view(), name="profile"),
 ]

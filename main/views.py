@@ -449,9 +449,39 @@ class TestRunView(RoleRequiredMixin, View):
             "subtheme": subtheme,
             "test": test,
             "show_answers": True,
-            "selected_answers": selected_answers,
             "correct_count": correct_count,
             "total_questions": total_questions,
             "percentage": round(percentage, 1)
+        })
+
+
+class ProfileView(RoleRequiredMixin, View):
+    template_name = 'profile.html'
+    required_roles = []
+
+    def get(self, request, *args, **kwargs):
+        results = Result.objects.filter(user=request.user).select_related(
+            'test', 'test__subtheme', 'test__subtheme__theme'
+        ).prefetch_related('items__answer__question').order_by('-created_at')
+
+        results_data = []
+        for result in results:
+            total = result.test.questions.count()
+            correct = 0
+            for question in result.test.questions.all():
+                correct_answers = set(question.answers.filter(is_right=True).values_list('id', flat=True))
+                selected = set(result.items.filter(answer__question=question).values_list('answer_id', flat=True))
+                if correct_answers == selected and len(correct_answers) > 0:
+                    correct += 1
+            percentage = round(correct / total * 100, 1) if total > 0 else 0
+            results_data.append({
+                'result': result,
+                'correct': correct,
+                'total': total,
+                'percentage': percentage,
+            })
+
+        return render(request, self.template_name, {
+            'results_data': results_data,
         })
 

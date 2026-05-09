@@ -27,6 +27,7 @@
                             </span>
                         {% endif %}
                     </div>
+                    <a href="{% url 'profile' %}" class="btn btn-outline">Личный кабинет</a>
                     <a href="{% url 'logout' %}" class="btn btn-outline">Выйти</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn btn-outline">Войти</a>

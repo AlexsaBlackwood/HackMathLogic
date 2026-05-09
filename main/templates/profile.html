@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="profile-container">
+    <div class="page-header">
+        <h1>Личный кабинет</h1>
+        <p class="page-description">Управление профилем и история прохождения тестов</p>
+    </div>
+
+    <div class="user-info-card">
+        <div class="user-info-header">
+            <h2 class="user-name-large">{{ request.user.username }}</h2>
+            <span class="user-role-badge role-{{ request.user.profile.role|lower }}">
+                {{ request.user.profile.get_role_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="results-section">
+        <h3 class="section-title">История тестов</h3>
+        {% if results_data %}
+            <div class="results-table-wrapper">
+                <table class="results-table-styled">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Тема</th>
+                            <th>Подтема</th>
+                            <th>Тест</th>
+                            <th>Результат</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in results_data %}
+                        <tr>
+                            <td>{{ item.result.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ item.result.test.subtheme.theme.title }}</td>
+                            <td>{{ item.result.test.subtheme.title }}</td>
+                            <td>{{ item.result.test.question }}</td>
+                            <td>
+                                <span class="result-count">{{ item.correct }} из {{ item.total }}</span>
+                                <span class="result-percentage">({{ item.percentage }}%)</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>Тесты пока не пройдены</h3>
+                <p>Вы ещё не проходили тесты. Начните изучение математической логики!</p>
+                <a href="{% url 'themes_list' %}" class="btn btn-primary">Перейти к темам</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

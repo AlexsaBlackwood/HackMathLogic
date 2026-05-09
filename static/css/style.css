@@ -1006,10 +1006,17 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    cursor: pointer;
 }
 
 .answer-item:hover {
     border-color: #667eea;
+    background-color: #f9f9f9;
+}
+
+.answer-text {
+    flex: 1;
+    font-size: 1rem;
 }
 
 .answer-label {
@@ -1120,4 +1127,106 @@ h2 {
 
 h3 {
     font-size: 1.25rem;
+}
+
+/* Личный кабинет */
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 20px;
+}
+
+.user-info-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px solid #f0f0f0;
+}
+
+.user-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.user-name-large {
+    font-size: 1.75rem;
+    color: #333;
+    margin: 0;
+}
+
+.user-role-badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 500;
+}
+
+.user-role-badge.role-student {
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+.user-role-badge.role-teacher {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+}
+
+.user-role-badge.role-admin {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.results-section {
+    margin-top: 2rem;
+}
+
+.results-table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 2px solid #f0f0f0;
+}
+
+.results-table-styled {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results-table-styled thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.results-table-styled th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.results-table-styled td {
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.results-table-styled tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.results-table-styled tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+.result-count {
+    color: #666;
+}
+
+.result-percentage {
+    color: #667eea;
+    font-weight: 600;
+    margin-left: 0.5rem;
 }
